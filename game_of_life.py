@@ -25,18 +25,14 @@ class Board(object):
 
         Return the value of the cell at row r and column c.
         """
-        r = r % self._rows
-        c = c % self._cols
-        return self._b[r][c]
+        return self._b[r % self._rows][c % self._cols]
 
     def set_cell(self, r, c, value):
         """(Board, int, int, object) -> NoneType
 
         Set the value of the cell at row r and column c.
         """
-        r = r % self._rows
-        c = c % self._cols
-        self._b[r][c] = value
+        self._b[r % self._rows][c % self._cols] = value
 
     def num_rows(self):
         """(Board) -> int
@@ -90,7 +86,7 @@ class LifeBoard(Board):
                         new_b.set_cell(r, c, self.a)
         return new_b
 
-    def state_at_gen(self, generation):
+    def state_at_generation(self, generation):
         """(LifeBoard, int) -> LifeBoard"""
         board = self
         for gen in range(generation):
@@ -144,6 +140,6 @@ class LifeBoard(Board):
 
 
 if __name__ == '__main__':
-    gof = LifeBoard(10, 10)
-    gof.add_glider(4, 4)
-    print(gof)
+    gol = LifeBoard(10, 10)
+    gol.add_glider(4, 4)
+    print(gol)
