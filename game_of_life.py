@@ -121,5 +121,5 @@ def draw_board(board):
 
 if __name__ == '__main__':
     life = create_board(10, 10)
-    add_pattern(life
-
+    add_pattern(life, COMMON['glider'], 4, 4)
+    print(draw_board(step(life, 2)))

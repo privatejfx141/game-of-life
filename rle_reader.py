@@ -46,15 +46,19 @@ def read_sequence(sequence):
             else:
                 repeat += char
     
-    # Fix the last row of the pattern.
-    if len(pattern[-1]) < len(pattern[-2]):
-        pattern[-1] += [DEAD] * (len(pattern[-2])-len(pattern[-1]))
+    # Fix any uneven rows of the pattern.
+    pattern_length = len(max(pattern, key=len))
+    for r in range(len(pattern)-1, -1, -1):
+        if len(pattern[r]) < pattern_length:
+            pattern[r] += [DEAD] * (pattern_length-len(pattern[r]))
 
     # Return the read pattern.
     return pattern
 
 
 if __name__ == '__main__':
+    
+    """
     # Garden of Eden 1 RLE sequence.
     eden1_seq = '33o$2obob3ob3ob2obobobobobobobobobo$'
     eden1_seq += 'obob3ob3ob4ob3obobobobobobob$5ob3ob3ob4ob14o'
@@ -70,3 +74,10 @@ if __name__ == '__main__':
 
     # Read and draw a glider RLE sequence.
     print(draw_pattern(read_sequence('bob$2bo$3o!')))
+    """
+
+    steamship_data = read_rle(open('steamship.rle', 'r'))
+    steamship = read_sequence(steamship_data['seq'])
+    print(steamship)
+    print(steamship_data['l'], steamship_data['h'])
+    print(draw_pattern(steamship))

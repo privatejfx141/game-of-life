@@ -9,7 +9,7 @@ pg.init()
 BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
 WHITE = (255, 255, 255)
-TILESIZE = 5
+TILESIZE = 4
 FONT = pg.font.Font("FreeSansBold.ttf", 18)
 
 
@@ -23,6 +23,7 @@ def play(board):
     
     # Initialize the display surface.
     DISPLAY = pg.display.set_mode((num_cols*TILESIZE, num_rows*TILESIZE+50))
+    pg.display.set_caption("Game of Life")
 
     RUNNING, PAUSE = 0, 1    
     state = RUNNING
@@ -60,7 +61,7 @@ def play(board):
                                  num_rows * TILESIZE + 50))
 
             # Rate of display.
-            sleep(0.05)
+            sleep(0.01)
 
             # Display text on bottom portion of display..
             text = FONT.render('Generation ' + str(generation), True, WHITE)
@@ -73,6 +74,8 @@ def play(board):
                               TILESIZE, TILESIZE))
             # Step forward to the next generation on the board.
             board = step(board)
+            
+            
             
             # Update the display surface.
             pg.display.update()
@@ -90,7 +93,12 @@ def play(board):
 
 
 if __name__ == '__main__':
-    life_board = create_board(100, 100)
-    add_pattern(life_board, METHUSELAH['r-pentomino'], 0, 0)
-    add_pattern(life_board, METHUSELAH['r-pentomino'], 50, 50)
-    play(life_board)
+    life = create_board(100, 100)
+    add_pattern(life, COMMON['glider'], 0, 0)
+    add_pattern(life, COMMON['glider'], 0, 10)
+    add_pattern(life, COMMON['glider'], 0, 20)
+    add_pattern(life, COMMON['glider'], 0, 30)
+    add_pattern(life, COMMON['glider'], 0, 40)
+    add_pattern(life, COMMON['glider'], 0, 50)
+    add_pattern(life, COMMON['r-pentomino'], 10, 90)
+    play(life)
