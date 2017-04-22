@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 def transpose_pattern(pattern, counter_cw = False):
     transpose = []
     for c in range(len(pattern[0])):
         transpose.append([pattern[r][c] for r in range(len(pattern))])
     return transpose
     
+=======
+DEAD, ALIVE = '.', 'o'
+SPACE = ' '
+
+>>>>>>> origin/master
 
 def draw_pattern(pattern):
     """(list of list) -> str
@@ -15,9 +21,9 @@ def draw_pattern(pattern):
     # Loop through each cell.
     for r in range(num_rows):
         for c in range(num_cols):
-            res += 'o' if pattern[r][c] else '.'
-            if c != num_cols- 1:
-                res += ' '
+            res += ALIVE if pattern[r][c] else DEAD
+            if c != num_cols - 1:
+                res += SPACE
         if r != num_rows - 1:
             res += '\n'
     # Return the string representation.
