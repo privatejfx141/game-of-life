@@ -1,125 +1,129 @@
-from patterns import *
+DEAD, ALIVE, SPACE = '.', 'o', ' '
 
 
-def create_board(rows, cols):
-    """(int, int) -> list of list
+class Grid:
+    """Sparse matrix representation of Conway's Game of Life."""
 
-    Create and return a boolean board of rows rows and cols columns.
-    """
-    return [[False]*cols for r in range(rows)]
+    def __init__(self, rows, cols):
+        """(Grid, int, int) -> NoneType
 
+        Create a Game of Life grid with the given rows and columns.
 
-def add_cell(board, r, c, value=True):
-    """(list of list, int, int[, object]) -> NoneType
+        REQ: rows, cols > 5
+        """
+        self._rows = rows
+        self._cols = cols
+        self._alive = set()
 
-    Set cell at (r, c) with value to the board.
-    """
-    board[r % len(board)][c % len(board[0])] = value
+    def __str__(self):
+        """(Grid) -> str
 
+        Return the string representation of this grid.
+        """
+        result = ''
+        for r in range(self._rows):
+            for c in range(self._cols):
+                if (r, c) in self._alive:
+                    result += ALIVE
+                else:
+                    result += DEAD
+                if c != self._cols - 1:
+                    result += SPACE
+            if r != self._rows - 1:
+                result += '\n'
+        return result
 
-def add_pattern(board, pattern, r, c):
-    """(list of list, list of list, int, int) -> NoneType
+    def clear(self):
+        """(Grid) -> NoneType
+        
+        Clear this grid of all living cells.
+        """
+        self._alive = set()
 
-    Add pattern to (r, c) on the board.
-    """
-    for h in range(len(pattern)):
-        for w in range(len(pattern[0])):
-            if pattern[h][w] == 1:
-                board[(r + h) % len(board)][(c + w) % len(board[0])] = True
+    def dimensions(self):
+        """(Grid) -> (int, int)
 
+        Return a tuple of the number of rows and columns.
+        """
+        return self._rows, self._cols
 
-def pattern_to_board(pattern):
-    """(list of list of int) -> list of list of bool
+    def add_cell(self, r, c):
+        """(Grid, int, int) -> NoneType
 
-    Convert pattern to a life board.
-    """
-    board = list()
-    for r in range(len(pattern)):
-        board.append(list())
-        for c in range(len(pattern[0])):
-            board[r].append(True if pattern[r][c] == 1 else False)
-    return board
+        Add a living cell to this grid.
+        """
+        self._alive.add((r, c))
 
+    def neighbours(self, r, c):
+        """(Grid, int, int) -> int
 
-def neighbours(board, r, c):
-    """(list of list, int, int) -> int
-    
-    Return the number of alive neighbours around cell at (r, c).
-    """
-    count = 0
-    for ver in [-1, 0, 1]:
-        for hor in [-1, 0, 1]:
-            if not (ver == hor == 0):
-                # If neighbour is alive, increment counter.
-                if board[(r+ver) % len(board)][(c+hor) % len(board[0])]:
-                    count += 1
-    return count
+        Return a set of all neighbours around the cell (r, c).
+        """
+        rg = (-1, 0, 1)
+        return {((r+h) % self._rows, (c+w) % self._cols) for h in rg
+                for w in rg if not (h == w == 0)}
 
+    def alive_cells(self, by_value=True):
+        """(Grid) -> set of (int, int)
 
-def step(board, count=1):
-    """(list of list[, int]) -> list of list
+        Return a set of all the living cells on this grid. If by_value, return
+        a copy of the set. Otherwise return a pointer (by reference).
+        """
+        if by_value:
+            return self._alive.copy()
+        else:
+            return self._alive
 
-    Play the simulation and return board at generation count.
-    """
-    # Get the number of rows and columns.
-    num_rows, num_cols = len(board), len(board[0])
-    # Create a copy of the board.
-    curr_board = [row.copy() for row in board]
+    def step(self, count=1):
+        """(Grid[, int]) -> Grid
 
-    # Loop through each generation.
-    for generation in range(count):
-        # Create an empty new board.
-        new_board = create_board(num_rows, num_cols)
-        # Loop through each cell.
-        for r in range(num_rows):
-            for c in range(num_cols):
-                # Get number of neighbours of the current cell.
-                nbs = neighbours(curr_board, r, c)
-                # Determine which cell lives on to the next generation.
-                was_alive = curr_board[r][c]
-                is_alive = nbs == 3 or (nbs == 2 and was_alive)
-                new_board[r][c] = is_alive
-        # Set new board as current board.
-        curr_board = new_board
+        Build the state of this grid at generation count.
 
-    # Return the board at generation count.
-    return curr_board
+        REQ: count >= 0
+        """
+        # Loop through each generation.
+        for generation in range(count):
 
+            # Build the set of cells that could be alive.
+            temp = self._alive.copy()
+            for r, c in self._alive:
+                temp = temp.union(self.neighbours(r, c))
 
-def alive_cells(board):
-    """(list of list) -> set of {(int, int)}
-    
-    Return the set of coordinates of all alive cells.
-    """
-    alive = set()
-    for r in range(len(board)):
-        for c in range(len(board[0])):
-            if board[r][c]:
-                alive.add((r, c))
-    return alive
+            # Determine which cells live on to the next generation.
+            new_cells = set()
+            for cell in temp:
+                nbs = len(set.intersection(
+                    self._alive, self.neighbours(*cell)))
+                is_alive = nbs == 3 or (nbs == 2 and cell in self._alive)
+                if is_alive:
+                    new_cells.add(cell)
 
+            # Set the new cells.
+            self._alive = new_cells
 
-def draw_board(board):
-    """(list of list) -> str
+        return self
 
-    Return the string representation of board.
-    """
-    res = ''
-    # Return the number of rows and columns
-    num_rows, num_cols = len(board), len(board[0])
-    # Loop through each cell.
-    for r in range(num_rows):
-        for c in range(num_cols):
-            res += 'o' if board[r][c] else '.'
-            if c != num_cols-1:
-                res += ' '
-        if r != num_rows-1:
-            res += '\n'
-    # Return the string representation.
-    return res
+    def add_pattern(self, pattern, r=None, c=None):
+        """(Grid, list of list, int, int)
+
+        Add a pattern to this grid. If r and c are not specific,
+        add a pattern to the center of this grid.
+        """
+        # If no r, c values are specific, get the centre of the grid.
+        if not (r and c):
+            r = self._rows // 2
+            c = self._cols // 2
+        # Loop and add the living cells onto the board.
+        for h in range(len(pattern)):
+            for w in range(len(pattern[0])):
+                if pattern[h][w] == 1:
+                    self._alive.add(((r+h) % self._rows, (c+w) % self._cols))
 
 
 if __name__ == '__main__':
-    life = create_board(10, 10)
-    add_pattern(life, COMMON['glider'], 4, 4)
-    print(draw_board(step(life, 2)))
+    board = Grid(10, 10)
+    board.add_pattern([[0, 1, 0], [0, 0, 1], [1, 1, 1]], 1, 1)
+
+    print(board)
+    print()
+    print(board.step(100))
