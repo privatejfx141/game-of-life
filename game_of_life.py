@@ -1,11 +1,27 @@
+BIRTH, SURVIVAL = 'B', 'S'
 DEAD, ALIVE, SPACE = '.', 'o', ' '
+
+RULES = {
+    'life': 'B3/S23',
+    'pseudorandom': 'B25/S4',
+    'seeds': 'B2/S',
+    'replicator': 'B1357/S1357',
+    'inkspot': 'B3/S012345678',
+    '34life': 'B34/S34',
+    'diamoeba': 'B35678/S5678',
+    '2x2': 'B36/S125',
+    'highlife': 'B36/S23',
+    'daynight': 'B3678/S34678',
+    'morley': 'B368/S245',
+    'anneal': 'B4678/S35678'
+}
 
 
 class Grid:
     """Sparse matrix representation of Conway's Game of Life."""
 
-    def __init__(self, rows, cols):
-        """(Grid, int, int) -> NoneType
+    def __init__(self, rows, cols, rule=None):
+        """(Grid, int, int[, str]) -> NoneType
 
         Create a Game of Life grid with the given rows and columns.
 
@@ -14,6 +30,10 @@ class Grid:
         self._rows = rows
         self._cols = cols
         self._alive = set()
+        if not rule:
+            self._rule = {BIRTH: [3], SURVIVAL: [2, 3]}
+        else:
+            self.set_rule(rule)
 
     def __str__(self):
         """(Grid) -> str
@@ -46,6 +66,25 @@ class Grid:
         Return a tuple of the number of rows and columns.
         """
         return self._rows, self._cols
+
+    def set_rule(self, rule):
+        """(Grid, str) -> NoneType
+
+        Set the cellular automaton rule.
+        """
+        b, s = rule.split('/')
+        b_vals = list(map(int, list(b[1:])))
+        s_vals = list(map(int, list(s[1:])))
+        self._rule = {BIRTH: b_vals, SURVIVAL: s_vals}
+
+    def get_rule(self):
+        """(Grid) -> str
+        
+        Return the string representation of the cellular automaton rule.
+        """
+        b = BIRTH + ''.join(list(map(str, self._rule[BIRTH])))
+        s = SURVIVAL + ''.join(list(map(str, self._rule[SURVIVAL])))
+        return b + '/' + s
 
     def add_cell(self, r, c):
         """(Grid, int, int) -> NoneType
@@ -92,11 +131,15 @@ class Grid:
             # Determine which cells live on to the next generation.
             new_cells = set()
             for cell in temp:
-                nbs = len(set.intersection(
-                    self._alive, self.neighbours(*cell)))
-                is_alive = nbs == 3 or (nbs == 2 and cell in self._alive)
+                # Get number of neighbours.
+                nbs = len(self._alive.intersection(self.neighbours(*cell)))
+                # (default: B3/S23)
+                is_alive = nbs in self._rule[BIRTH] or (
+                    nbs in self._rule[SURVIVAL] and cell in self._alive)
                 if is_alive:
                     new_cells.add(cell)
+
+            del temp
 
             # Set the new cells.
             self._alive = new_cells

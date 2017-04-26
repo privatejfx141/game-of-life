@@ -8,9 +8,10 @@ pg.init()
 
 BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
+LIGHTGREY = (223, 223, 223)
 WHITE = (255, 255, 255)
 TILESIZE = 5
-SPEED = 0.07
+SPEED = 0.06
 FONT = pg.font.Font("FreeSansBold.ttf", 12)
 
 
@@ -26,21 +27,24 @@ def play(grid):
     DISPLAY = pg.display.set_mode((num_cols*TILESIZE, num_rows*TILESIZE+40))
     pg.display.set_caption("Game of Life")
 
-    RUNNING, PAUSE = 0, 1    
+    RUNNING, PAUSE = 0, 1
     state = RUNNING
     run = True
 
+    rule = grid.get_rule()
     generation = 0
     population = 0
 
     # Main game loop.
     while run:
 
+        click = False
+        remove_cell = False
         show_pause_text = False
 
         # Get the events.
         for event in pg.event.get():
-            
+
             # If user wants to quit.
             if event.type == pg.QUIT:
                 run = False
@@ -55,6 +59,22 @@ def play(grid):
                 # If user presses any other keys.
                 else:
                     state = RUNNING
+            
+            if event.type == pg.MOUSEBUTTONDOWN:
+                click = True
+
+        if click:
+            x, y = pg.mouse.get_pos()
+            mouse_r, mouse_c = y // TILESIZE, x // TILESIZE
+            if (mouse_r, mouse_c) in grid.alive_cells(by_value=False):
+                remove_cell = True
+            else:
+                grid.add_cell(mouse_r, mouse_c)
+            generation = 0
+            population += 1
+
+        if remove_cell:
+            grid.alive_cells(by_value=False).remove((mouse_r, mouse_c))
 
         # If display is running.
         if state == RUNNING:
@@ -62,17 +82,19 @@ def play(grid):
             # Colour the display background.
             DISPLAY.fill(GREY, (0, 0, num_cols * TILESIZE, 
                                 num_rows * TILESIZE))
-            DISPLAY.fill(BLACK, (0, num_rows * TILESIZE, num_cols * TILESIZE, 
+            DISPLAY.fill(BLACK, (0, num_rows * TILESIZE, num_cols * TILESIZE,
                                  num_rows * TILESIZE + 40))
 
             # Rate of display.
             sleep(SPEED)
 
             # Display text on bottom portion of display..
-            text = FONT.render('Generation ' + str(generation), True, WHITE)
+            text = FONT.render('Generation: ' + str(generation), True, WHITE)
             DISPLAY.blit(text, (10, num_rows * TILESIZE + 10))
-            text = FONT.render('Population ' + str(population), True, WHITE)
-            DISPLAY.blit(text, (160, num_rows * TILESIZE + 10))
+            text = FONT.render('Population: ' + str(population), True, WHITE)
+            DISPLAY.blit(text, (110, num_rows * TILESIZE + 10))
+            text = FONT.render('Rule: ' + rule, True, WHITE)
+            DISPLAY.blit(text, (210, num_rows * TILESIZE + 10))
 
             # Display the living cells as white squares.
             alive_cells = grid.alive_cells(by_value=False)
@@ -93,8 +115,18 @@ def play(grid):
         # If display is paused.
         elif state == PAUSE:
             text = FONT.render('Paused', True, WHITE)
-            DISPLAY.blit(text, (300, num_rows * TILESIZE + 10))
-            if show_pause_text:
+
+            if show_pause_text or click:
+                if click:
+                    if remove_cell:
+                        colour = GREY
+                    else:
+                        colour = WHITE
+                    pg.draw.rect(DISPLAY, colour,
+                                 (mouse_c * TILESIZE, mouse_r * TILESIZE,
+                                  TILESIZE, TILESIZE))
+                if show_pause_text:
+                    DISPLAY.blit(text, (300, num_rows * TILESIZE + 10))
                 pg.display.update()
             pass
 
@@ -104,6 +136,6 @@ def play(grid):
 
 
 if __name__ == '__main__':
-    life = Grid(100, 200)
-    life.add_pattern(transpose_pattern(WICK['cow']))
+    life = Grid(100, 100)
+    life.add_pattern(COMMON['block'])
     play(life)
