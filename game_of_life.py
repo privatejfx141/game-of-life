@@ -67,19 +67,33 @@ class Grid:
         """
         return self._rows, self._cols
 
+    def num_rows(self):
+        """(Grid) -> int
+
+        Return the number of rows of this grid.
+        """
+        return self._rows
+
+    def num_cols(self):
+        """(Grid) -> int
+
+        Return the number of columns of this grid.
+        """
+        return self._cols
+
     def set_rule(self, rule):
         """(Grid, str) -> NoneType
 
         Set the cellular automaton rule.
         """
         b, s = rule.split('/')
-        b_vals = list(map(int, list(b[1:])))
-        s_vals = list(map(int, list(s[1:])))
-        self._rule = {BIRTH: b_vals, SURVIVAL: s_vals}
+        b_values = list(map(int, list(b[1:])))
+        s_values = list(map(int, list(s[1:])))
+        self._rule = {BIRTH: b_values, SURVIVAL: s_values}
 
     def get_rule(self):
         """(Grid) -> str
-        
+
         Return the string representation of the cellular automaton rule.
         """
         b = BIRTH + ''.join(list(map(str, self._rule[BIRTH])))
@@ -131,15 +145,13 @@ class Grid:
             # Determine which cells live on to the next generation.
             new_cells = set()
             for cell in temp:
-                # Get number of neighbours.
+                # Get number of alive neighbours.
                 nbs = len(self._alive.intersection(self.neighbours(*cell)))
                 # (default: B3/S23)
                 is_alive = nbs in self._rule[BIRTH] or (
                     nbs in self._rule[SURVIVAL] and cell in self._alive)
                 if is_alive:
                     new_cells.add(cell)
-
-            del temp
 
             # Set the new cells.
             self._alive = new_cells
@@ -149,24 +161,28 @@ class Grid:
     def add_pattern(self, pattern, r=None, c=None):
         """(Grid, list of list, int, int)
 
-        Add a pattern to this grid. If r and c are not specific,
+        Add a pattern to this grid. If r and c are not specified,
         add a pattern to the center of this grid.
         """
+        # Get pattern dimensions.
+        height, width = len(pattern), len(pattern[0])
         # If no r, c values are specific, get the centre of the grid.
         if not (r and c):
             r = self._rows // 2
             c = self._cols // 2
         # Loop and add the living cells onto the board.
-        for h in range(len(pattern)):
-            for w in range(len(pattern[0])):
+        for h in range(height):
+            for w in range(width):
                 if pattern[h][w] == 1:
-                    self._alive.add(((r+h) % self._rows, (c+w) % self._cols))
+                    self._alive.add(((r+h-(height//2)) % self._rows,
+                                     (c+w-(width//2)) % self._cols))
 
 
 if __name__ == '__main__':
     board = Grid(10, 10)
-    board.add_pattern([[0, 1, 0], [0, 0, 1], [1, 1, 1]], 1, 1)
+    glider = [[0, 1, 0], [0, 0, 1], [1, 1, 1]]
+    board.add_pattern(glider, 1, 1)
 
     print(board)
-    print()
+    print('-' * 20)
     print(board.step(100))
