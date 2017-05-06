@@ -1,141 +1,114 @@
 import sys
 import pygame as pg
-from time import sleep
 from game_of_life import *
 from patterns import *
-
 pg.init()
 
 BLACK = (0, 0, 0)
+CHARCOAL = (25, 25, 25)
 GREY = (128, 128, 128)
-LIGHTGREY = (223, 223, 223)
 WHITE = (255, 255, 255)
-TILESIZE = 5
-SPEED = 0.06
-FONT = pg.font.Font("FreeSansBold.ttf", 12)
+BLUE = (0, 0, 200)
+CELLSIZE = 3
+FPS = 20
 
+FONT = pg.font.Font("FreeSansBold.ttf", 12)
+    
 
 def play(grid):
-    """(list of list) -> NoneType
-
+    """(Grid) -> NoneType
+    
     Run the Game of Life.
     """
-    # Get the number of rows and columns of the board.
+    # Get the dimensions of the grid and board.
     num_rows, num_cols = grid.dimensions()
     
-    # Initialize the display surface.
-    DISPLAY = pg.display.set_mode((num_cols*TILESIZE, num_rows*TILESIZE+40))
+    # Initialize display surface and Clock object.
     pg.display.set_caption("Game of Life")
-
-    RUNNING, PAUSE = 0, 1
-    state = RUNNING
-    run = True
-
+    display = pg.display.set_mode((num_cols*CELLSIZE, num_rows*CELLSIZE+40))
+    clock = pg.time.Clock()
+    
+    # Info to show on display surface.
     rule = grid.get_rule()
     generation = 0
     population = 0
+    paused = True
 
     # Main game loop.
-    while run:
+    while True:        
 
-        click = False
-        remove_cell = False
-        show_pause_text = False
+        # Set automaton fps.
+        clock.tick(FPS)
 
-        # Get the events.
+        # Get the set of alive cells on the grid.
+        alive_cells = grid.alive_cells(by_value=False)
+
+        # Get mouse position.
+        x, y = pg.mouse.get_pos()
+        mouseX, mouseY = x // CELLSIZE, y // CELLSIZE
+
+        # Get user events.
         for event in pg.event.get():
 
-            # If user wants to quit.
+            # If user exits the program.
             if event.type == pg.QUIT:
-                run = False
+                pg.quit()
+                sys.exit()
 
+            # If user presses on a key.
             if event.type == pg.KEYDOWN:
-                
-                # If user presses space bar.
-                if event.key == pg.K_SPACE and state == RUNNING:
-                    show_pause_text = True
-                    state = PAUSE
-                
-                # If user presses any other keys.
+                if event.key == pg.K_SPACE:
+                    paused = not paused
+
+            # If user left clicks somewhere on the grid.
+            if event.type == pg.MOUSEBUTTONDOWN and mouseY < num_rows:
+                # If cell is alive, kill it.
+                if (mouseY, mouseX) in alive_cells:
+                    alive_cells.remove((mouseY, mouseX))
+                    population -= 1
+                # If cell is dead, revive it.
                 else:
-                    state = RUNNING
-            
-            if event.type == pg.MOUSEBUTTONDOWN:
-                click = True
+                    grid.add_cell(mouseY, mouseX)
+                    population += 1
+                # Manual modification resets generation counter.
+                generation = 0
 
-        if click:
-            x, y = pg.mouse.get_pos()
-            mouse_r, mouse_c = y // TILESIZE, x // TILESIZE
-            if (mouse_r, mouse_c) in grid.alive_cells(by_value=False):
-                remove_cell = True
-            else:
-                grid.add_cell(mouse_r, mouse_c)
-            generation = 0
-            population += 1
+        # Fill the display surface background colours.
+        display.fill(GREY, (0, 0, num_cols * CELLSIZE, num_rows * CELLSIZE))
+        display.fill(CHARCOAL, (0, num_rows * CELLSIZE, num_cols * CELLSIZE, num_rows * CELLSIZE + 80))
+        # Display the cells.
+        for cell in alive_cells:
+            pg.draw.rect(display, WHITE, (cell[1] * CELLSIZE, cell[0] * CELLSIZE, CELLSIZE, CELLSIZE))
+        population = len(alive_cells)
+        # Highlight whatever cell the mouse is hovering upon.
+        if mouseY < num_rows:
+            pg.draw.rect(display, BLUE, (mouseX * CELLSIZE, mouseY * CELLSIZE, CELLSIZE, CELLSIZE), 1)
+        # Display game rule.
+        text = FONT.render('Rule: ' + rule, True, WHITE)
+        display.blit(text, (250, num_rows * CELLSIZE + 10))
+        # Display generation count.
+        text = FONT.render('Generation: ' + str(generation), True, WHITE)
+        display.blit(text, (10, num_rows * CELLSIZE + 10))
+        # Display population count.
+        text = FONT.render('Population: ' + str(population), True, WHITE)
+        display.blit(text, (130, num_rows * CELLSIZE + 10))
 
-        if remove_cell:
-            grid.alive_cells(by_value=False).remove((mouse_r, mouse_c))
-
-        # If display is running.
-        if state == RUNNING:
-
-            # Colour the display background.
-            DISPLAY.fill(GREY, (0, 0, num_cols * TILESIZE, 
-                                num_rows * TILESIZE))
-            DISPLAY.fill(BLACK, (0, num_rows * TILESIZE, num_cols * TILESIZE,
-                                 num_rows * TILESIZE + 40))
-
-            # Rate of display.
-            sleep(SPEED)
-
-            # Display text on bottom portion of display..
-            text = FONT.render('Generation: ' + str(generation), True, WHITE)
-            DISPLAY.blit(text, (10, num_rows * TILESIZE + 10))
-            text = FONT.render('Population: ' + str(population), True, WHITE)
-            DISPLAY.blit(text, (110, num_rows * TILESIZE + 10))
-            text = FONT.render('Rule: ' + rule, True, WHITE)
-            DISPLAY.blit(text, (210, num_rows * TILESIZE + 10))
-
-            # Display the living cells as white squares.
-            alive_cells = grid.alive_cells(by_value=False)
-            for cell in alive_cells:
-                pg.draw.rect(DISPLAY, WHITE,
-                             (cell[1] * TILESIZE, cell[0] * TILESIZE,
-                              TILESIZE, TILESIZE))
-            # Step forward to the next generation on the board.
+        # If automaton is paused.
+        if paused:
+            # Display 'Paused' on bottom-right corner.
+            display.blit(FONT.render('Paused', True, WHITE), (
+                num_cols * CELLSIZE - 60, num_rows * CELLSIZE + 10))
+        # If automaton is running.
+        else:
+            # Step forward to the next generation on the grid.
             grid.step()
-            
-            # Update the display surface.
-            pg.display.update()
-
-            # Increment to next generation.
             generation += 1
-            population = len(alive_cells)
 
-        # If display is paused.
-        elif state == PAUSE:
-            text = FONT.render('Paused', True, WHITE)
-
-            if show_pause_text or click:
-                if click:
-                    if remove_cell:
-                        colour = GREY
-                    else:
-                        colour = WHITE
-                    pg.draw.rect(DISPLAY, colour,
-                                 (mouse_c * TILESIZE, mouse_r * TILESIZE,
-                                  TILESIZE, TILESIZE))
-                if show_pause_text:
-                    DISPLAY.blit(text, (300, num_rows * TILESIZE + 10))
-                pg.display.update()
-            pass
-
-    # Exit the display.
-    pg.quit()
-    sys.exit()
+        # Update the display.
+        pg.display.flip()
 
 
 if __name__ == '__main__':
-    life = Grid(100, 100)
-    life.add_pattern(COMMON['block'])
+    life = Grid(200, 300)
+    life.add_pattern(transpose_pattern(SPACESHIP['steamship']))
     play(life)
