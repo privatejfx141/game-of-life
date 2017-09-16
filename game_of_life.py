@@ -100,6 +100,13 @@ class Grid:
         s = SURVIVAL + ''.join(list(map(str, self._rule[SURVIVAL])))
         return b + '/' + s
 
+    def set_cells(self, *cells):
+        """(Grid, tuple of (int, int)) -> NoneType
+
+        Set the living cells of this grid.
+        """
+        self._alive = set(cells)
+
     def add_cell(self, r, c):
         """(Grid, int, int) -> NoneType
 
@@ -122,10 +129,7 @@ class Grid:
         Return a set of all the living cells on this grid. If by_value, return
         a copy of the set. Otherwise return a pointer (by reference).
         """
-        if by_value:
-            return self._alive.copy()
-        else:
-            return self._alive
+        return self._alive.copy() if by_value else self._alive
 
     def step(self, count=1):
         """(Grid[, int]) -> Grid

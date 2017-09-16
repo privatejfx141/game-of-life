@@ -83,6 +83,6 @@ if __name__ == '__main__':
     print(steamship_data['l'], steamship_data['h'])
     print(draw_pattern(steamship))
     """
-    
+
     pattern = read_sequence('2o7b2o2b2o2b2o2b2o2b2o2b2o2b2o5b$2o4bob3o2b2o2b2o2b2o2b2o2b2o2b2o3b2o$4b2obo29bobo$4b2o3b29o2b$4b2obo30bob$2o4bob3o2b2o2b2o2b2o2b2o2b2o2b2o2b2ob$2o7b2o2b2o2b2o2b2o2b2o2b2o2b2o!')
     print(draw_pattern(pattern))
