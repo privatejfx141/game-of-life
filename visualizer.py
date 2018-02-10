@@ -23,6 +23,18 @@ CELLSIZE = 6
 ICON = pg.image.load("gol_glider.png")
 pg.display.set_icon(ICON)
 FONT = pg.font.Font("FreeSansBold.ttf", 12)
+
+DEBUG_MSG = {
+    pg.K_SPACE: "[SPACE]: .toggle simulation",
+    pg.K_RETURN: "[ENTER]: step to next generation",
+    pg.K_s: "[S]: clear grid of alive cells",
+    pg.K_a: "[A]: revert back to initial state",
+    pg.K_f: "[F]: toggle GPS rate",
+    pg.K_g: "[G]: toggle grid lines",
+    pg.K_q: "[Q]: exit application",
+    pg.K_PERIOD: "[,]: decrease GPS rate",
+    pg.K_COMMA: "[.]: increase GPS rate"
+}
     
 
 def terminate():
@@ -101,7 +113,10 @@ def play(grid):
 
             # If user presses on a key.
             if event.type == pg.KEYDOWN:
-                print(event.key)
+                try:
+                    print(DEBUG_MSG[event.key])
+                except:
+                    print('No key available for:', event.key)
                 # If space key, pause/resume simulation.
                 if event.key == pg.K_SPACE:
                     paused = not paused
@@ -114,24 +129,24 @@ def play(grid):
                     paused = True
                     generation = 0
                     population = 0
-                # If g key, display/hide grid lines.
+                # If g key, display/hide grid lines
                 if event.key == pg.K_g:
                     show_grid_lines = not show_grid_lines
-                # If r key, revert back to initial state as inputted.
+                # If r key, revert back to initial state as inputted
                 if event.key == pg.K_a:
                     grid.set_cells(*original_cells)
                     paused = True
                     generation = 0
                     population = len(original_cells)
+                # if f key, show generations per second (GPS)
                 if event.key == pg.K_f:
                     show_gps = not show_gps
-
+                # if n key, change background colour
                 if event.key == pg.K_n:
                     bg_colour = (bg_colour + 1) % len(BG_COLOURS)
-
+                # if m key, change cell colour
                 if event.key == pg.K_m:
                     cell_colour = (cell_colour + 1) % len(CELL_COLOURS)
-
                 # If q key, exit the program.
                 if event.key == pg.K_q:
                     terminate()
@@ -157,9 +172,6 @@ def play(grid):
         # Fill the grid background colour.
         display.fill(BG_COLOURS[bg_colour], (
             0, 0, num_cols * CELLSIZE, num_rows * CELLSIZE))
-        # Fill the footer background colour.
-        display.fill(RAISIN, (
-            0, num_rows * CELLSIZE, num_cols * CELLSIZE, num_rows * CELLSIZE + 80))
         # Display the cells.
         for cell in alive_cells:
             pg.draw.rect(display, CELL_COLOURS[cell_colour], (
@@ -174,6 +186,9 @@ def play(grid):
                 pg.draw.line(display, CHARCOAL, (
                     CELLSIZE + add, 0), (CELLSIZE + add, CELLSIZE * num_rows))
                 add += CELLSIZE
+        # Fill the footer background colour.
+        display.fill(RAISIN, (
+            0, num_rows * CELLSIZE, num_cols * CELLSIZE, num_rows * CELLSIZE + 80))
         # Highlight whatever cell the mouse is hovering upon.
         if mouseY < num_rows:
             pg.draw.rect(display, SPACE_CADET, (
