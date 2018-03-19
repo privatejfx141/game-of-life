@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\jeffc\PycharmProjects\ccc-waterloo\.idea\ccc-waterloo.iml" filepath="C:\Users\jeffc\PycharmProjects\ccc-waterloo\.idea\ccc-waterloo.iml" />
+      <module fileurl="file://$USER_HOME$/PycharmProjects/ccc-waterloo/.idea/ccc-waterloo.iml" filepath="$USER_HOME$/PycharmProjects/ccc-waterloo/.idea/ccc-waterloo.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/game-of-life.iml" filepath="$PROJECT_DIR$/.idea/game-of-life.iml" />
     </modules>
   </component>

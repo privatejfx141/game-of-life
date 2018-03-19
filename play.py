@@ -16,16 +16,16 @@ import sys
 import pygame as pg
 from game_of_life import *
 from colours import *
-from patterns import *
+
 pg.init()
 
 CELLSIZE = 6
-ICON = pg.image.load("gol_glider.png")
+ICON = pg.image.load("assets\\gol_glider.png")
 pg.display.set_icon(ICON)
-FONT = pg.font.Font("FreeSansBold.ttf", 12)
+FONT = pg.font.Font("assets\\FreeSansBold.ttf", 12)
 
 DEBUG_MSG = {
-    pg.K_SPACE: "[SPACE]: .toggle simulation",
+    pg.K_SPACE: "[SPACE]: toggle simulation",
     pg.K_RETURN: "[ENTER]: step to next generation",
     pg.K_s: "[S]: clear grid of alive cells",
     pg.K_a: "[A]: revert back to initial state",
@@ -35,7 +35,7 @@ DEBUG_MSG = {
     pg.K_PERIOD: "[,]: decrease GPS rate",
     pg.K_COMMA: "[.]: increase GPS rate"
 }
-    
+
 
 def terminate():
     pg.quit()
@@ -223,6 +223,7 @@ def play(grid):
 
 
 if __name__ == '__main__':
-    life = Grid(100, 200)
-    life.add_pattern(transpose_pattern(SPACESHIP['glider']))
+    life = Grid(64, 128)
+    glider = [[0, 1, 0], [0, 0, 1], [1, 1, 1]]
+    life.add_pattern(glider)
     play(life)

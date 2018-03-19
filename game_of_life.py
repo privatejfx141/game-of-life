@@ -182,11 +182,114 @@ class Grid:
                                      (c+w-(width//2)) % self._cols))
 
 
-if __name__ == '__main__':
-    board = Grid(10, 10)
-    glider = [[0, 1, 0], [0, 0, 1], [1, 1, 1]]
-    board.add_pattern(glider, 1, 1)
+def fix_pattern(pattern_mtx):
+    """(list matrix of int) -> list matrix of int
 
-    print(board)
-    print('-' * 20)
-    print(board.step(100))
+    Fixes the pattern matrix so that every row of the resultant matrix will be
+    of equal length; the result matrix is perfectly rectangular.
+
+    :param pattern_mtx: a matrix of integers representing the pattern
+    :return: the fixed pattern matrix
+    """
+    new_pattern = list()
+    max_cell_len = max(map(len, pattern_mtx))
+    for cell_line in pattern_mtx:
+        new_cell_line = cell_line + ([0] * (max_cell_len - len(cell_line)))
+        new_pattern.append(new_cell_line)
+    return new_pattern
+
+
+def rotate_pattern(pattern_mtx, fixed=True):
+    """(list matrix of int[, bool]) -> list matrix of int
+
+    Rotates the pattern matrix clockwise.
+
+    :param pattern_mtx: a matrix of integers representing the pattern
+    :param fixed: True if all rows of the matrix are of equal length; is rectangular
+    :return: the rotated pattern
+    """
+    if not fixed:
+        pattern_mtx = fix_pattern(pattern_mtx)
+    new_pattern = [list(row) for row in zip(*pattern_mtx[::-1])]
+    return new_pattern
+
+
+def transpose_pattern(pattern_mtx, fixed=True):
+    """(list matrix of int[, bool]) -> list matrix of int
+
+    Transposes the pattern matrix.
+
+    :param pattern_mtx: a matrix of integers representing the pattern
+    :param fixed: True if all rows of the matrix are of equal length; is rectangular
+    :return: the diagonally flipped or transposed pattern
+    """
+    if not fixed:
+        pattern_mtx = fix_pattern(pattern_mtx)
+    new_pattern = [list(row) for row in zip(*pattern_mtx)]
+    return new_pattern
+
+
+def flip_horizontal_pattern(pattern_mtx, fixed=True):
+    """(list matrix of int[, bool]) -> list matrix of int
+
+    Horizontally flips the pattern matrix.
+
+    :param pattern_mtx: a matrix of integers representing the pattern
+    :param fixed: True if all rows of the matrix are of equal length; is rectangular
+    :return: the horizontally flipped pattern
+
+    >>> photon = [[1, 0, 0], [0, 0, 1], [0, 0, 1], [1, 0, 0]]
+    >>> flip_horizontal_pattern(photon)
+    [[0, 0, 1], [1, 0, 0], [1, 0, 0], [0, 0, 1]]
+    """
+    if not fixed:
+        pattern_mtx = fix_pattern(pattern_mtx)
+    new_pattern = [row[::-1] for row in pattern_mtx]
+    return new_pattern
+
+
+def flip_vertical_pattern(pattern_mtx, fixed=True):
+    """(list matrix of int[, bool]) -> list matrix of int
+
+    Vertically flips the pattern matrix.
+
+    :param pattern_mtx: a matrix of integers representing the pattern
+    :param fixed: True if all rows of the matrix are of equal length; is rectangular
+    :return: the vertically flipped pattern
+
+    >>> glider = [[0, 1, 0], [0, 0, 1], [1, 1, 1]]
+    >>> flip_vertical_pattern(glider)
+    [[1, 1, 1], [0, 0, 1], [0, 1, 0]]
+    """
+    if not fixed:
+        pattern_mtx = fix_pattern(pattern_mtx)
+    return pattern_mtx[::-1]
+
+
+def print_pattern(pattern_mtx: [[int]]) -> None:
+    """(list matrix of int) -> NoneType
+
+    Prints the pattern matrix.
+
+    :param pattern_mtx: a matrix of integers representing the pattern
+
+    >>> glider = [[0, 1, 0], [0, 0, 1], [1, 1, 1]]
+    >>> print_pattern(glider)
+    . o .
+    . . o
+    o o o
+    >>> photon = [[1, 0, 0], [0, 0, 1], [0, 0, 1], [1, 0, 0]]
+    >>> print_pattern(photon)
+    o . .
+    . . o
+    . . o
+    o . .
+    """
+    for cell_list in pattern_mtx:
+        str_list = ['o' if cell == 1 else '.' for cell in cell_list]
+        print(" ".join(str_list))
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
