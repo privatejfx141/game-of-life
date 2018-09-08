@@ -1,3 +1,4 @@
+# default colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (128, 128, 128)
@@ -5,6 +6,7 @@ RAISIN = (32, 32, 32)
 CHARCOAL = (64, 64, 64)
 SPACE_CADET = (29, 41, 81)
 
+# light colours
 RED = (255, 0, 0)
 ORANGE = (255, 128, 0)
 YELLOW = (255, 255, 0)
@@ -18,6 +20,7 @@ PURPLE = (128, 0, 255)
 PINK = (255, 0, 255)
 MAGENTA = (255, 0, 128)
 
+# dark colours
 DARK_RED = (102, 0, 0)
 DARK_ORANGE = (102, 51, 0)
 DARK_GREEN = (0, 102, 0)
