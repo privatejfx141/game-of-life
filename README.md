@@ -1,13 +1,5 @@
 # game-of-life
-Python list implementation of Conway's Game of Life
 
-## Getting Started
-The [PyGame](https://www.pygame.org) module is required in order to run the Game of Life visualizer:
-```
-$ pip install pygame
-```
+A grid implementation of Conway's Game of Life using React.js and Bootstrap.
 
-## Files
-* game_of_life.py - Main source code for Game of Life
-* patterns.py - Life patterns
-* visualizer.py - PyGame visualizer
+I decided to replace the old Python project with the React project.
