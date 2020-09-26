@@ -4,7 +4,7 @@ import React from "react";
 function Footer() {
     return (
         <footer>
-            <h3>This is my footer element</h3>
+            <h3>Implemented with React and Bootstrap</h3>
         </footer>
     )
 }
